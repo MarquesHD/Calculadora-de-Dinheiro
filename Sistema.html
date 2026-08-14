@@ -1,0 +1,892 @@
+<html lang="pt-BR"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Contador de Dinheiro | Uso Interno</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #eef2ef;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Cabeçalho simples */
+        .header-simples {
+            background: #1a6d5e;
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header-simples h1 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-simples h1 i {
+            font-size: 1.1rem;
+        }
+
+        .data-hora {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Grid principal */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 0.85fr;
+            gap: 16px;
+        }
+
+        /* Painel de notas/moedas */
+        .panel {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .panel-titulo {
+            background: #f5f7f6;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8e4;
+        }
+
+        .panel-titulo h2 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #2c5a4c;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grid-notas {
+            padding: 16px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .card-nota {
+            background: #fefefe;
+            border: 1px solid #e2ece7;
+            border-radius: 12px;
+            padding: 12px;
+            transition: all 0.2s;
+        }
+
+        .card-nota:hover {
+            border-color: #c0d6ce;
+            background: #fafefc;
+        }
+
+        .valor-nota {
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .valor-nota i {
+            font-size: 1.2rem;
+            color: #daa520;
+        }
+
+        .moeda-icon {
+            color: #b87333;
+        }
+
+        .input-group {
+            margin-bottom: 10px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #d4e0db;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            text-align: center;
+            font-weight: 500;
+            font-family: 'Inter', monospace;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #1a6d5e;
+        }
+
+        .subtotal {
+            font-size: 0.7rem;
+            display: flex;
+            justify-content: space-between;
+            padding-top: 8px;
+            border-top: 1px solid #eef2ef;
+            color: #5b6e6a;
+        }
+
+        .subtotal span:last-child {
+            font-weight: 600;
+            color: #1a6d5e;
+        }
+
+        /* Painel de total */
+        .painel-total {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            height: fit-content;
+        }
+
+        .total-box {
+            background: #f8fbfa;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8e4;
+        }
+
+        .total-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #7c988e;
+            font-weight: 500;
+        }
+
+        .total-valor {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1a6d5e;
+            margin-top: 8px;
+            word-break: break-word;
+        }
+
+        .detalhes {
+            padding: 16px;
+            flex: 1;
+        }
+
+        .detalhe-linha {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eef2ef;
+            font-size: 0.75rem;
+        }
+
+        .detalhe-linha .valor-detalhe {
+            font-weight: 600;
+            color: #2c5a4c;
+        }
+
+        .detalhe-total {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px solid #d4e3dd;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .acoes {
+            padding: 16px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #e2e8e4;
+            background: #fafdfb;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 40px;
+            border: none;
+            font-weight: 500;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: #1a6d5e;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0f5447;
+        }
+
+        .btn-secondary {
+            background: #eef2ef;
+            color: #4f6b64;
+            border: 1px solid #d4e0db;
+        }
+
+        .btn-secondary:hover {
+            background: #e2eae6;
+        }
+
+        /* Modal simples */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-conteudo {
+            background: white;
+            border-radius: 20px;
+            max-width: 350px;
+            width: 90%;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .modal-conteudo h3 {
+            font-size: 1.1rem;
+            color: #1a6d5e;
+            margin: 12px 0;
+        }
+
+        .modal-botoes {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-botoes button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Estilo impressão térmica */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+            .header-simples, .panel:first-child, .acoes, .btn, .modal {
+                display: none !important;
+            }
+            .main-grid {
+                display: block;
+            }
+            .painel-total {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+            }
+            .total-valor {
+                font-size: 1.8rem;
+            }
+            @page {
+                size: 80mm auto;
+                margin: 4mm;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            body {
+                padding: 10px;
+            }
+            .total-valor {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Cabeçalho simples uso interno -->
+    <div class="header-simples">
+        <h1><i class="fas fa-calculator"></i> Contador de Dinheiro • Uso Interno</h1>
+        <div class="data-hora" id="dataHora"><i class="far fa-clock"></i> 14/08/2026, 11:20</div>
+    </div>
+
+    <div class="main-grid">
+        <!-- Painel de cédulas e moedas -->
+        <div class="panel">
+            <div class="panel-titulo">
+                <h2><i class="fas fa-money-bill-wave"></i> Cédulas e Moedas</h2>
+            </div>
+            <div class="grid-notas" id="gridNotas">
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-money-bill" style="color: #daa520; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 200</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">CÉDULA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-200" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-200">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-money-bill" style="color: #daa520; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 100</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">CÉDULA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-100" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-100">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-money-bill" style="color: #daa520; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 50</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">CÉDULA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-50" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-50">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-money-bill" style="color: #daa520; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 20</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">CÉDULA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-20" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-20">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-money-bill" style="color: #daa520; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 10</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">CÉDULA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-10" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-10">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-money-bill" style="color: #daa520; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 5</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">CÉDULA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-5" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-5">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-money-bill" style="color: #daa520; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 2</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">CÉDULA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-2" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-2">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-circle" style="color: #b87333; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 1</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">MOEDA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-1" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-1">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-circle" style="color: #b87333; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 0,50</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">MOEDA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-0.5" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-0.5">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-circle" style="color: #b87333; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 0,25</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">MOEDA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-0.25" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-0.25">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-circle" style="color: #b87333; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 0,10</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">MOEDA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-0.1" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-0.1">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-circle" style="color: #b87333; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 0,05</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">MOEDA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-0.05" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-0.05">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas fa-circle" style="color: #b87333; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">R$ 0,01</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">MOEDA</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-0.01" value="0" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-0.01">R$&nbsp;0,00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel de total e resumo -->
+        <div class="painel-total">
+            <div class="total-box">
+                <div class="total-label">VALOR TOTAL</div>
+                <div class="total-valor" id="totalDisplay">R$&nbsp;0,00</div>
+            </div>
+            <div class="detalhes" id="detalhesContainer"><div style="text-align:center; color:#8aa89e; padding:16px;"><i class="fas fa-info-circle"></i> Nenhum valor inserido</div></div>
+            <div class="acoes">
+                <button class="btn btn-secondary" id="btnZerar"><i class="fas fa-trash-alt"></i> Zerar</button>
+                <button class="btn btn-primary" id="btnImprimir"><i class="fas fa-print"></i> Imprimir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de impressão -->
+<div id="modalImpressao" class="modal">
+    <div class="modal-conteudo">
+        <i class="fas fa-print" style="font-size: 2.5rem; color: #1a6d5e;"></i>
+        <h3>Imprimir comprovante</h3>
+        <p style="font-size:0.8rem; color:#6b7e78;">Enviar para impressora térmica?</p>
+        <div class="modal-botoes">
+            <button id="confirmarImpressao" style="background:#1a6d5e; color:white;">Sim, imprimir</button>
+            <button id="cancelarImpressao" style="background:#eef2ef;">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Lista de valores (notas e moedas oficiais)
+    const valores = [
+        { valor: 200, tipo: "nota", label: "R$ 200", icone: "fa-money-bill" },
+        { valor: 100, tipo: "nota", label: "R$ 100", icone: "fa-money-bill" },
+        { valor: 50, tipo: "nota", label: "R$ 50", icone: "fa-money-bill" },
+        { valor: 20, tipo: "nota", label: "R$ 20", icone: "fa-money-bill" },
+        { valor: 10, tipo: "nota", label: "R$ 10", icone: "fa-money-bill" },
+        { valor: 5, tipo: "nota", label: "R$ 5", icone: "fa-money-bill" },
+        { valor: 2, tipo: "nota", label: "R$ 2", icone: "fa-money-bill" },
+        { valor: 1, tipo: "moeda", label: "R$ 1", icone: "fa-circle" },
+        { valor: 0.50, tipo: "moeda", label: "R$ 0,50", icone: "fa-circle" },
+        { valor: 0.25, tipo: "moeda", label: "R$ 0,25", icone: "fa-circle" },
+        { valor: 0.10, tipo: "moeda", label: "R$ 0,10", icone: "fa-circle" },
+        { valor: 0.05, tipo: "moeda", label: "R$ 0,05", icone: "fa-circle" },
+        { valor: 0.01, tipo: "moeda", label: "R$ 0,01", icone: "fa-circle" }
+    ];
+
+    // Estado das quantidades
+    let quantidades = {};
+    let totalGeral = 0;
+
+    // Inicializar quantidades zeradas
+    valores.forEach(v => {
+        quantidades[v.valor.toString()] = 0;
+    });
+
+    // Formatar moeda
+    function formatarMoeda(valor) {
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+    }
+
+    // Calcular total
+    function calcularTotal() {
+        let total = 0;
+        valores.forEach(v => {
+            const qtd = quantidades[v.valor.toString()] || 0;
+            total += v.valor * qtd;
+        });
+        totalGeral = total;
+        return total;
+    }
+
+    // Atualizar toda interface
+    function atualizarInterface() {
+        const total = calcularTotal();
+        document.getElementById("totalDisplay").innerHTML = formatarMoeda(total);
+
+        // Atualizar subtotais nos cards
+        valores.forEach(v => {
+            const qtd = quantidades[v.valor.toString()] || 0;
+            const subtotalSpan = document.getElementById(`subtotal-${v.valor}`);
+            if (subtotalSpan) {
+                subtotalSpan.innerText = formatarMoeda(v.valor * qtd);
+            }
+        });
+
+        // Atualizar detalhes no painel direito
+        const detalhesDiv = document.getElementById("detalhesContainer");
+        let html = "";
+        let temItem = false;
+
+        // Ordenar do maior para o menor
+        const ordenados = [...valores].sort((a,b) => b.valor - a.valor);
+
+        for (let v of ordenados) {
+            const qtd = quantidades[v.valor.toString()] || 0;
+            if (qtd > 0) {
+                temItem = true;
+                const subtotal = v.valor * qtd;
+                const labelExibicao = v.label;
+                const qtdTexto = qtd === 1 ? (v.tipo === 'nota' ? 'nota' : 'moeda') : (v.tipo === 'nota' ? 'notas' : 'moedas');
+                html += `
+                    <div class="detalhe-linha">
+                        <span><i class="fas ${v.icone}" style="font-size:0.7rem;"></i> ${labelExibicao} × ${qtd} ${qtdTexto}</span>
+                        <span class="valor-detalhe">${formatarMoeda(subtotal)}</span>
+                    </div>
+                `;
+            }
+        }
+
+        if (!temItem) {
+            html = '<div style="text-align:center; color:#8aa89e; padding:16px;"><i class="fas fa-info-circle"></i> Nenhum valor inserido</div>';
+        } else {
+            html += `<div class="detalhe-linha detalhe-total">
+                        <span><strong>TOTAL</strong></span>
+                        <span class="valor-detalhe" style="font-size:0.85rem;"><strong>${formatarMoeda(total)}</strong></span>
+                    </div>`;
+        }
+
+        detalhesDiv.innerHTML = html;
+    }
+
+    // Manipular mudança de quantidade
+    function onChangeQuantidade(valor, event) {
+        let novaQtd = parseInt(event.target.value) || 0;
+        if (isNaN(novaQtd)) novaQtd = 0;
+        if (novaQtd < 0) novaQtd = 0;
+        quantidades[valor.toString()] = novaQtd;
+        event.target.value = novaQtd;
+        atualizarInterface();
+    }
+
+    // Zerar todas as quantidades
+    function zerarTudo() {
+        if (confirm("Zerar todas as quantidades?")) {
+            valores.forEach(v => {
+                quantidades[v.valor.toString()] = 0;
+                const inputEl = document.getElementById(`input-${v.valor}`);
+                if (inputEl) inputEl.value = 0;
+            });
+            atualizarInterface();
+        }
+    }
+
+    // Gerar texto do comprovante para impressão térmica
+    function gerarComprovante() {
+        const agora = new Date();
+        const dataStr = agora.toLocaleDateString('pt-BR');
+        const horaStr = agora.toLocaleTimeString('pt-BR');
+        
+        let linhas = [];
+        linhas.push("=".repeat(32));
+        linhas.push("     CONTAGEM DE DINHEIRO");
+        linhas.push("     USO INTERNO");
+        linhas.push("=".repeat(32));
+        linhas.push(`Data: ${dataStr}  Hora: ${horaStr}`);
+        linhas.push("-".repeat(32));
+        
+        let temItem = false;
+        const ordenados = [...valores].sort((a,b) => b.valor - a.valor);
+        
+        for (let v of ordenados) {
+            const qtd = quantidades[v.valor.toString()] || 0;
+            if (qtd > 0) {
+                temItem = true;
+                const labelEspaco = v.label.padEnd(8);
+                const qtdEspaco = `x${qtd}`.padStart(5);
+                const subtotal = v.valor * qtd;
+                const valorFormat = formatarMoeda(subtotal);
+                linhas.push(`${labelEspaco} ${qtdEspaco} = ${valorFormat}`);
+            }
+        }
+        
+        if (!temItem) {
+            linhas.push("Nenhum valor registrado");
+        }
+        
+        linhas.push("-".repeat(32));
+        linhas.push(`TOTAL GERAL: ${formatarMoeda(totalGeral)}`);
+        linhas.push("=".repeat(32));
+        linhas.push("   COMPROVANTE VÁLIDO");
+        linhas.push("   Conferência de caixa");
+        linhas.push("=".repeat(32));
+        
+        return linhas.join("\n");
+    }
+
+    // Função de impressão térmica
+    function imprimirTermica() {
+        const comprovante = gerarComprovante();
+        
+        const printWindow = window.open('', '_blank', 'width=450,height=600,toolbar=yes,scrollbars=yes');
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Comprovante Contagem</title>
+                <style>
+                    body {
+                        font-family: 'Courier New', 'Consolas', monospace;
+                        font-size: 11px;
+                        margin: 0;
+                        padding: 8px;
+                        width: 80mm;
+                        margin: 0 auto;
+                        background: white;
+                    }
+                    pre {
+                        font-family: 'Courier New', 'Consolas', monospace;
+                        font-size: 10px;
+                        margin: 0;
+                        white-space: pre-wrap;
+                        word-wrap: break-word;
+                        line-height: 1.3;
+                    }
+                    @page {
+                        size: 80mm auto;
+                        margin: 3mm;
+                    }
+                    @media print {
+                        body {
+                            margin: 0;
+                            padding: 0;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <pre>${comprovante}</pre>
+                <script>
+                    window.onload = function() {
+                        setTimeout(function() {
+                            window.print();
+                            setTimeout(function() { window.close(); }, 800);
+                        }, 200);
+                    }
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+
+    // Renderizar grid de notas e moedas
+    function renderizarGrid() {
+        const grid = document.getElementById("gridNotas");
+        let html = "";
+        
+        // Ordenar valores decrescentes
+        const ordenados = [...valores].sort((a,b) => b.valor - a.valor);
+        
+        ordenados.forEach(v => {
+            const qtdAtual = quantidades[v.valor.toString()] || 0;
+            const valorExibicao = v.valor < 1 ? v.label : v.label;
+            const iconeClasse = v.tipo === 'nota' ? 'fa-money-bill' : 'fa-circle';
+            const corIcone = v.tipo === 'nota' ? '#daa520' : '#b87333';
+            
+            html += `
+                <div class="card-nota">
+                    <div class="valor-nota">
+                        <i class="fas ${iconeClasse}" style="color: ${corIcone}; font-size: 1rem;"></i>
+                        <span style="font-weight:700;">${valorExibicao}</span>
+                        <span style="font-size:0.6rem; background:#eef2ef; padding:2px 6px; border-radius:12px;">${v.tipo === 'nota' ? 'CÉDULA' : 'MOEDA'}</span>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="input-${v.valor}" value="${qtdAtual}" min="0" step="1" placeholder="Quantidade">
+                    </div>
+                    <div class="subtotal">
+                        <span>Subtotal</span>
+                        <span id="subtotal-${v.valor}">${formatarMoeda(v.valor * qtdAtual)}</span>
+                    </div>
+                </div>
+            `;
+        });
+        
+        grid.innerHTML = html;
+        
+        // Adicionar event listeners
+        ordenados.forEach(v => {
+            const inputEl = document.getElementById(`input-${v.valor}`);
+            if (inputEl) {
+                inputEl.addEventListener("input", (e) => onChangeQuantidade(v.valor, e));
+            }
+        });
+    }
+
+    // Atualizar data/hora
+    function atualizarDataHora() {
+        const now = new Date();
+        const formatted = now.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        document.getElementById("dataHora").innerHTML = `<i class="far fa-clock"></i> ${formatted}`;
+    }
+
+    // Modal
+    const modal = document.getElementById("modalImpressao");
+    const btnImprimir = document.getElementById("btnImprimir");
+    const btnZerar = document.getElementById("btnZerar");
+    const confirmarBtn = document.getElementById("confirmarImpressao");
+    const cancelarBtn = document.getElementById("cancelarImpressao");
+
+    btnImprimir.addEventListener("click", () => {
+        if (totalGeral === 0 && !Object.values(quantidades).some(q => q > 0)) {
+            if (confirm("Nenhum valor inserido. Deseja imprimir mesmo assim?")) {
+                imprimirTermica();
+            }
+        } else {
+            modal.style.display = "flex";
+        }
+    });
+
+    confirmarBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+        imprimirTermica();
+    });
+
+    cancelarBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    btnZerar.addEventListener("click", zerarTudo);
+
+    // Fechar modal clicando fora
+    window.onclick = (e) => {
+        if (e.target === modal) {
+            modal.style.display = "none";
+        }
+    };
+
+    // Inicializar
+    renderizarGrid();
+    atualizarInterface();
+    atualizarDataHora();
+    setInterval(atualizarDataHora, 60000);
+</script>
+<script defer="" src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;e3c1c9af36de41759418005494a48906&quot;,&quot;r&quot;:1,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}" crossorigin="anonymous"></script>
+
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;e3c1c9af36de41759418005494a48906&quot;,&quot;r&quot;:1}" crossorigin="anonymous"></script>
+</body></html>
